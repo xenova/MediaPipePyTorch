@@ -128,6 +128,28 @@ class BlazeBlock(nn.Module):
         return self.act(self.convs(h) + x)
 
 
+class FinalBlazeBlock(nn.Module):
+    def __init__(self, channels, kernel_size=3):
+        super(FinalBlazeBlock, self).__init__()
+
+        # TFLite uses slightly different padding than PyTorch
+        # on the depthwise conv layer when the stride is 2.
+        self.convs = nn.Sequential(
+            nn.Conv2d(in_channels=channels, out_channels=channels,
+                      kernel_size=kernel_size, stride=2, padding=0,
+                      groups=channels, bias=True),
+            nn.Conv2d(in_channels=channels, out_channels=channels,
+                      kernel_size=1, stride=1, padding=0, bias=True),
+        )
+
+        self.act = nn.ReLU(inplace=True)
+
+    def forward(self, x):
+        h = F.pad(x, (0, 2, 0, 2), "constant", 0)
+
+        return self.act(self.convs(h))
+
+
 class BlazeBase(nn.Module):
     """ Base class for media pipe models. """
 
@@ -309,7 +331,8 @@ class BlazeDetector(BlazeBase):
         y0 = detection[:,4+2*self.kp1+1]
         x1 = detection[:,4+2*self.kp2]
         y1 = detection[:,4+2*self.kp2+1]
-        theta = np.arctan2(y0-y1, x0-x1) - self.theta0
+        #theta = np.arctan2(y0-y1, x0-x1) - self.theta0
+        theta = torch.atan2(y0-y1, x0-x1) - self.theta0
         return xc, yc, scale, theta
 
 
