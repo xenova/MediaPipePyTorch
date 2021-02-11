@@ -43,7 +43,7 @@ if len(sys.argv) > 1:
     mirror_img = False
 else:
     capture = cv2.VideoCapture(0)
-    mirror_img = False
+    mirror_img = True
 
 if capture.isOpened():
     hasFrame, frame = capture.read()
