@@ -39,6 +39,7 @@ def draw_roi(img, roi):
 
 
 def draw_landmarks(img, points, connections=[], color=(0, 255, 0), size=2):
+    points = points[:,:2]
     for point in points:
         x, y = point
         x, y = int(x), int(y)

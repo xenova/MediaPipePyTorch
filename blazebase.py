@@ -169,7 +169,7 @@ class BlazeLandmark(BlazeBase):
 
         # take points on unit square and transform them according to the roi
         points = torch.tensor([[-1, -1, 1, 1],
-                            [-1, 1, -1, 1]]).view(1,2,4)
+                            [-1, 1, -1, 1]], device=scale.device).view(1,2,4)
         points = points * scale.view(-1,1,1)/2
         theta = theta.view(-1, 1, 1)
         R = torch.cat((
@@ -190,17 +190,17 @@ class BlazeLandmark(BlazeBase):
             pts = points[i, :, :3].cpu().numpy().T
             M = cv2.getAffineTransform(pts, points1)
             img = cv2.warpAffine(frame, M, (res,res))#, borderValue=127.5)
-            img = torch.from_numpy(img)
+            img = torch.tensor(img, device=scale.device)
             imgs.append(img)
             affine = cv2.invertAffineTransform(M).astype('float32')
-            affine = torch.from_numpy(affine)
+            affine = torch.tensor(affine, device=scale.device)
             affines.append(affine)
         if imgs:
             imgs = torch.stack(imgs).permute(0,3,1,2).float() / 255.#/ 127.5 - 1.0
             affines = torch.stack(affines)
         else:
-            imgs = torch.zeros((0, 3, res, res))
-            affines = torch.zeros((0, 2, 3))
+            imgs = torch.zeros((0, 3, res, res), device=scale.device)
+            affines = torch.zeros((0, 2, 3), device=scale.device)
 
         return imgs, affines, points
 

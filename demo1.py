@@ -43,7 +43,7 @@ while hasFrame:
 
     xc, yc, scale, theta = pose_detector.detection2roi(pose_detections)
     img, affine, box = pose_regressor.extract_roi(frame, xc, yc, theta, scale)
-    flags, normalized_landmarks, mask = pose_regressor(img)
+    flags, normalized_landmarks, mask = pose_regressor(img.to(gpu))
     landmarks = pose_regressor.denormalize_landmarks(normalized_landmarks, affine)
 
     draw_detections(frame, pose_detections)
