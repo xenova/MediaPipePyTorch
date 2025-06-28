@@ -47,6 +47,8 @@ hand_regressor.load_weights("blazehand_landmark.pth")
 face_regressor = BlazeFaceLandmark().to(gpu)
 face_regressor.load_weights("blazeface_landmark.pth")
 
+detect_face = False
+detect_hand = True
 
 WINDOW = "test"
 cv2.namedWindow(WINDOW)
@@ -73,41 +75,46 @@ while hasFrame:
 
     img1, img2, scale, pad = resize_pad(frame)
 
-    if back_detector:
-        normalized_face_detections = face_detector.predict_on_image(img1)
-    else:
-        normalized_face_detections = face_detector.predict_on_image(img2)
-    normalized_palm_detections = palm_detector.predict_on_image(img1)
+    # Face detection and landmarks
+    if detect_face:
+        if back_detector:
+            normalized_face_detections = face_detector.predict_on_image(img1)
+        else:
+            normalized_face_detections = face_detector.predict_on_image(img2)
+        face_detections = denormalize_detections(normalized_face_detections, scale, pad)
 
-    face_detections = denormalize_detections(normalized_face_detections, scale, pad)
-    palm_detections = denormalize_detections(normalized_palm_detections, scale, pad)
+        xc, yc, scale_face, theta = face_detector.detection2roi(face_detections.cpu())
+        img_face, affine, box = face_regressor.extract_roi(frame, xc, yc, theta, scale_face)
+        flags, normalized_landmarks = face_regressor(img_face.to(gpu))
+        landmarks = face_regressor.denormalize_landmarks(normalized_landmarks.cpu(), affine)
 
-    xc, yc, scale, theta = face_detector.detection2roi(face_detections.cpu())
-    img, affine, box = face_regressor.extract_roi(frame, xc, yc, theta, scale)
-    flags, normalized_landmarks = face_regressor(img.to(gpu))
-    landmarks = face_regressor.denormalize_landmarks(normalized_landmarks.cpu(), affine)
+        for i in range(len(flags)):
+            landmark, flag = landmarks[i], flags[i]
+            if flag > 0.5:
+                draw_landmarks(frame, landmark[:, :2], FACE_CONNECTIONS, size=1)
 
-    xc, yc, scale, theta = palm_detector.detection2roi(palm_detections.cpu())
-    img, affine2, box2 = hand_regressor.extract_roi(frame, xc, yc, theta, scale)
-    flags2, handed2, normalized_landmarks2 = hand_regressor(img.to(gpu))
-    landmarks2 = hand_regressor.denormalize_landmarks(
-        normalized_landmarks2.cpu(), affine2
-    )
+        draw_roi(frame, box)
+        draw_detections(frame, face_detections)
 
-    for i in range(len(flags)):
-        landmark, flag = landmarks[i], flags[i]
-        if flag > 0.5:
-            draw_landmarks(frame, landmark[:, :2], FACE_CONNECTIONS, size=1)
+    # Hand detection and landmarks
+    if detect_hand:
+        normalized_palm_detections = palm_detector.predict_on_image(img1)
+        palm_detections = denormalize_detections(normalized_palm_detections, scale, pad)
 
-    for i in range(len(flags2)):
-        landmark, flag = landmarks2[i], flags2[i]
-        if flag > 0.5:
-            draw_landmarks(frame, landmark[:, :2], HAND_CONNECTIONS, size=2)
+        xc, yc, scale_hand, theta = palm_detector.detection2roi(palm_detections.cpu())
+        img_hand, affine2, box2 = hand_regressor.extract_roi(frame, xc, yc, theta, scale_hand)
+        flags2, handed2, normalized_landmarks2 = hand_regressor(img_hand.to(gpu))
+        landmarks2 = hand_regressor.denormalize_landmarks(
+            normalized_landmarks2.cpu(), affine2
+        )
 
-    draw_roi(frame, box)
-    draw_roi(frame, box2)
-    draw_detections(frame, face_detections)
-    draw_detections(frame, palm_detections)
+        for i in range(len(flags2)):
+            landmark, flag = landmarks2[i], flags2[i]
+            if flag > 0.5:
+                draw_landmarks(frame, landmark[:, :2], HAND_CONNECTIONS, size=2)
+
+        draw_roi(frame, box2)
+        draw_detections(frame, palm_detections)
 
     cv2.imshow(WINDOW, frame[:, :, ::-1])
     # cv2.imwrite('sample/%04d.jpg'%frame_ct, frame[:,:,::-1])
