@@ -269,8 +269,8 @@ class BlazeDetector(BlazeBase):
         assert self.anchors.shape[1] == 4
 
     def _preprocess(self, x):
-        """Converts the image pixels to the range [-1, 1]."""
-        return x.float() / 255.0  # 127.5 - 1.0
+        """Converts the image pixels to the range [0, 1]."""
+        return x.float() / 255.0
 
     def predict_on_image(self, img):
         """Makes a prediction on a single image.
