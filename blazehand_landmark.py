@@ -5,10 +5,10 @@ import torch.nn.functional as F
 
 from blazebase import BlazeLandmark, BlazeBlock
 
+
 class BlazeHandLandmark(BlazeLandmark):
-    """The hand landmark model from MediaPipe.
-    
-    """
+    """The hand landmark model from MediaPipe."""
+
     def __init__(self):
         super(BlazeHandLandmark, self).__init__()
 
@@ -19,9 +19,15 @@ class BlazeHandLandmark(BlazeLandmark):
 
     def _define_layers(self):
         self.backbone1 = nn.Sequential(
-            nn.Conv2d(in_channels=3, out_channels=24, kernel_size=3, stride=2, padding=0, bias=True),
+            nn.Conv2d(
+                in_channels=3,
+                out_channels=24,
+                kernel_size=3,
+                stride=2,
+                padding=0,
+                bias=True,
+            ),
             nn.ReLU(inplace=True),
-
             BlazeBlock(24, 24, 5),
             BlazeBlock(24, 24, 5),
             BlazeBlock(24, 48, 5, 2),
@@ -85,7 +91,6 @@ class BlazeHandLandmark(BlazeLandmark):
         self.handed = nn.Conv2d(288, 1, 2, bias=True)
         self.landmarks = nn.Conv2d(288, 63, 2, bias=True)
 
-
     def forward(self, x):
         if x.shape[0] == 0:
             return torch.zeros((0,)), torch.zeros((0,)), torch.zeros((0, 21, 3))
@@ -97,14 +102,14 @@ class BlazeHandLandmark(BlazeLandmark):
         z = self.backbone3(y)
         w = self.backbone4(z)
 
-        z = z + F.interpolate(w, scale_factor=2, mode='bilinear')
+        z = z + F.interpolate(w, scale_factor=2, mode="bilinear")
         z = self.blaze5(z)
 
-        y = y + F.interpolate(z, scale_factor=2, mode='bilinear')
+        y = y + F.interpolate(z, scale_factor=2, mode="bilinear")
         y = self.blaze6(y)
         y = self.conv7(y)
 
-        x = x + F.interpolate(y, scale_factor=2, mode='bilinear')
+        x = x + F.interpolate(y, scale_factor=2, mode="bilinear")
 
         x = self.backbone8(x)
 

@@ -12,7 +12,6 @@ gpu = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 torch.set_grad_enabled(False)
 
 
-
 pose_detector = BlazePose().to(gpu)
 pose_detector.load_weights("blazepose.pth")
 pose_detector.load_anchors("anchors_pose.npy")
@@ -21,7 +20,7 @@ pose_regressor = BlazePoseLandmark().to(gpu)
 pose_regressor.load_weights("blazepose_landmark.pth")
 
 
-WINDOW='test'
+WINDOW = "test"
 cv2.namedWindow(WINDOW)
 capture = cv2.VideoCapture(0)
 
@@ -32,9 +31,9 @@ else:
     hasFrame = False
 
 while hasFrame:
-    frame_ct +=1
+    frame_ct += 1
 
-    frame = np.ascontiguousarray(frame[:,::-1,::-1])
+    frame = np.ascontiguousarray(frame[:, ::-1, ::-1])
 
     img1, img2, scale, pad = resize_pad(frame)
 
@@ -51,10 +50,10 @@ while hasFrame:
 
     for i in range(len(flags)):
         landmark, flag = landmarks[i], flags[i]
-        if flag>.5:
+        if flag > 0.5:
             draw_landmarks(frame, landmark, POSE_CONNECTIONS, size=2)
 
-    cv2.imshow(WINDOW, frame[:,:,::-1])
+    cv2.imshow(WINDOW, frame[:, :, ::-1])
     # cv2.imwrite('sample/%04d.jpg'%frame_ct, frame[:,:,::-1])
 
     hasFrame, frame = capture.read()
