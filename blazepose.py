@@ -51,9 +51,6 @@ class BlazePose(BlazeDetector):
         self.dscale = 1.5
         self.dy = 0.0
 
-        self._define_layers()
-
-    def _define_layers(self):
         self.backbone1 = nn.Sequential(
             nn.Conv2d(
                 in_channels=3,
@@ -118,8 +115,6 @@ class BlazePose(BlazeDetector):
         # permute the output from the conv layers before reshaping it.
 
         c1 = self.classifier_8(x)
-        # print(c1)
-        # print(c1.shape)
 
         c1 = c1.permute(0, 2, 3, 1)
         c1 = c1.contiguous().view(b, -1, 1)

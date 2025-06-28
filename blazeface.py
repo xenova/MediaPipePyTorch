@@ -64,9 +64,6 @@ class BlazeFace(BlazeDetector):
         self.dscale = 1.5
         self.dy = 0.0
 
-        self._define_layers()
-
-    def _define_layers(self):
         if self.back_model:
             self.backbone = nn.Sequential(
                 nn.Conv2d(

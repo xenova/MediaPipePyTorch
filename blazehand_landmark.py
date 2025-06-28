@@ -14,9 +14,6 @@ class BlazeHandLandmark(BlazeLandmark):
         # size of ROIs used for input
         self.resolution = 256
 
-        self._define_layers()
-
-    def _define_layers(self):
         self.backbone1 = nn.Sequential(
             nn.Conv2d(
                 in_channels=3,
