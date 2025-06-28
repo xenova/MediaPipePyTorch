@@ -260,6 +260,8 @@ class BlazeDetector(BlazeBase):
     https://github.com/google/mediapipe/
     """
 
+    _correct_shift_orientation = False
+
     def load_anchors(self, path):
         self.anchors = torch.tensor(
             np.load(path), dtype=torch.float32, device=self._device()
@@ -368,9 +370,6 @@ class BlazeDetector(BlazeBase):
                 "detection2roi_method [%s] not supported" % self.detection2roi_method
             )
 
-        yc += self.dy * scale
-        scale *= self.dscale
-
         # compute box rotation
         x0 = detection[:, 4 + 2 * self.kp1]
         y0 = detection[:, 4 + 2 * self.kp1 + 1]
@@ -378,6 +377,19 @@ class BlazeDetector(BlazeBase):
         y1 = detection[:, 4 + 2 * self.kp2 + 1]
         # theta = np.arctan2(y0-y1, x0-x1) - self.theta0
         theta = torch.atan2(y0 - y1, x0 - x1) - self.theta0
+
+        dl = self.dy * scale
+        if self._correct_shift_orientation:
+            # See https://github.com/zmurez/MediaPipePyTorch/issues/7 for more details.
+            dl_x = dl * torch.sin(-theta)
+            dl_y = dl * torch.cos(-theta)
+            xc += dl_x
+            yc += dl_y
+            scale *= 1.04
+        else:
+            yc += dl
+
+        scale *= self.dscale
         return xc, yc, scale, theta
 
     def _tensors_to_detections(self, raw_box_tensor, raw_score_tensor, anchors):

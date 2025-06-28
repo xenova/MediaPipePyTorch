@@ -9,6 +9,8 @@ from blazebase import BlazeDetector, BlazeBlock
 class BlazePalm(BlazeDetector):
     """The palm detection model from MediaPipe."""
 
+    _correct_shift_orientation = True
+
     def __init__(self):
         super(BlazePalm, self).__init__()
 
