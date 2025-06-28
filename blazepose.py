@@ -122,21 +122,21 @@ class BlazePose(BlazeDetector):
         # print(c1.shape)
 
         c1 = c1.permute(0, 2, 3, 1)
-        c1 = c1.reshape(b, -1, 1)
+        c1 = c1.contiguous().view(b, -1, 1)
 
         c2 = self.classifier_16(h)
         c2 = c2.permute(0, 2, 3, 1)
-        c2 = c2.reshape(b, -1, 1)
+        c2 = c2.contiguous().view(b, -1, 1)
 
         c = torch.cat((c1, c2), dim=1)
 
         r1 = self.regressor_8(x)
         r1 = r1.permute(0, 2, 3, 1)
-        r1 = r1.reshape(b, -1, 12)
+        r1 = r1.contiguous().view(b, -1, 12)
 
         r2 = self.regressor_16(h)
         r2 = r2.permute(0, 2, 3, 1)
-        r2 = r2.reshape(b, -1, 12)
+        r2 = r2.contiguous().view(b, -1, 12)
 
         r = torch.cat((r1, r2), dim=1)
         return [r, c]

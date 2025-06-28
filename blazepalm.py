@@ -147,29 +147,29 @@ class BlazePalm(BlazeDetector):
 
         c1 = self.classifier_8(z)  # (b, 2, 16, 16)
         c1 = c1.permute(0, 2, 3, 1)  # (b, 16, 16, 2)
-        c1 = c1.reshape(b, -1, 1)  # (b, 512, 1)
+        c1 = c1.contiguous().view(b, -1, 1)  # (b, 512, 1)
 
         c2 = self.classifier_16(y)  # (b, 6, 8, 8)
         c2 = c2.permute(0, 2, 3, 1)  # (b, 8, 8, 6)
-        c2 = c2.reshape(b, -1, 1)  # (b, 384, 1)
+        c2 = c2.contiguous().view(b, -1, 1)  # (b, 384, 1)
 
         c3 = self.classifier_32(x)  # (b, 6, 8, 8)
         c3 = c3.permute(0, 2, 3, 1)  # (b, 8, 8, 6)
-        c3 = c3.reshape(b, -1, 1)  # (b, 384, 1)
+        c3 = c3.contiguous().view(b, -1, 1)  # (b, 384, 1)
 
         c = torch.cat((c3, c2, c1), dim=1)  # (b, 896, 1)
 
         r1 = self.regressor_8(z)  # (b, 32, 16, 16)
         r1 = r1.permute(0, 2, 3, 1)  # (b, 16, 16, 32)
-        r1 = r1.reshape(b, -1, 18)  # (b, 512, 16)
+        r1 = r1.contiguous().view(b, -1, 18)  # (b, 512, 16)
 
         r2 = self.regressor_16(y)  # (b, 96, 8, 8)
         r2 = r2.permute(0, 2, 3, 1)  # (b, 8, 8, 96)
-        r2 = r2.reshape(b, -1, 18)  # (b, 384, 16)
+        r2 = r2.contiguous().view(b, -1, 18)  # (b, 384, 16)
 
         r3 = self.regressor_32(x)  # (b, 96, 8, 8)
         r3 = r3.permute(0, 2, 3, 1)  # (b, 8, 8, 96)
-        r3 = r3.reshape(b, -1, 18)  # (b, 384, 16)
+        r3 = r3.contiguous().view(b, -1, 18)  # (b, 384, 16)
 
         r = torch.cat((r3, r2, r1), dim=1)  # (b, 896, 16)
 
