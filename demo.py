@@ -53,6 +53,7 @@ face_regressor.load_weights("blazeface_landmark.pth")
 detect_face = False
 detect_hand = True
 
+
 class ThreadedCamera:
     def __init__(self, src=0):
         self.capture = cv2.VideoCapture(src)
@@ -152,8 +153,7 @@ try:
             )
             flags, normalized_landmarks = face_regressor(img_face.to(device))
             landmarks = face_regressor.denormalize_landmarks(
-                normalized_landmarks,
-                affine
+                normalized_landmarks, affine
             )
 
             for i in range(len(flags)):
@@ -171,9 +171,7 @@ try:
                 normalized_palm_detections, scale, pad
             )
 
-            xc, yc, scale_hand, theta = palm_detector.detection2roi(
-                palm_detections
-            )
+            xc, yc, scale_hand, theta = palm_detector.detection2roi(palm_detections)
             img_hand, affine2, box2 = hand_regressor.extract_roi(
                 frame, xc, yc, theta, scale_hand
             )
