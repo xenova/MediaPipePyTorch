@@ -116,7 +116,6 @@ else:
     hasFrame = False
 
 # FPS tracking variables
-fps = 0
 prev_time = time.time() - 1e-6  # Start with a small offset to avoid division by zero
 
 try:
