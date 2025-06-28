@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import cv2
 import sys
+import time
 
 from blazebase import resize_pad, denormalize_detections
 from blazeface import BlazeFace
@@ -65,8 +66,17 @@ if capture.isOpened():
 else:
     hasFrame = False
 
+# FPS tracking variables
+fps = 0
+prev_time = time.time()
+
 while hasFrame:
     frame_ct += 1
+
+    # Calculate FPS
+    current_time = time.time()
+    fps = 1 / (current_time - prev_time)
+    prev_time = current_time
 
     if mirror_img:
         frame = np.ascontiguousarray(frame[:, ::-1, ::-1])
@@ -115,6 +125,9 @@ while hasFrame:
 
         draw_roi(frame, box2)
         draw_detections(frame, palm_detections)
+
+    # Draw FPS in top-left corner
+    cv2.putText(frame, f'FPS: {fps:.1f}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
     cv2.imshow(WINDOW, frame[:, :, ::-1])
     # cv2.imwrite('sample/%04d.jpg'%frame_ct, frame[:,:,::-1])
