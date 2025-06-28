@@ -60,13 +60,11 @@ def denormalize_detections(detections, scale, pad):
         pad: padding in the x and y dimensions
 
     """
-    detections[:, 0] = detections[:, 0] * scale * 256 - pad[0]
-    detections[:, 1] = detections[:, 1] * scale * 256 - pad[1]
-    detections[:, 2] = detections[:, 2] * scale * 256 - pad[0]
-    detections[:, 3] = detections[:, 3] * scale * 256 - pad[1]
-
-    detections[:, 4::2] = detections[:, 4::2] * scale * 256 - pad[1]
-    detections[:, 5::2] = detections[:, 5::2] * scale * 256 - pad[0]
+    detections *= scale * 256
+    detections[:, 0:4:2] -= pad[0]
+    detections[:, 1:4:2] -= pad[1]
+    detections[:, 4::2] -= pad[1]
+    detections[:, 5::2] -= pad[0]
     return detections
 
 
