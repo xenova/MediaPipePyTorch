@@ -158,7 +158,7 @@ class BlazeBase(nn.Module):
         return self.classifier_8.weight.device
     
     def load_weights(self, path):
-        self.load_state_dict(torch.load(path))
+        self.load_state_dict(torch.load(path, weights_only=True))
         self.eval()        
 
 
